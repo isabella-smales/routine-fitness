@@ -13,7 +13,6 @@ import random
 @app.route('/one_exercise')
 def one_exercise():
     no_of_rows = Back.query.count()
-    back = Back.query.first()
     random_number = random.randrange(1, no_of_rows + 1)
     random_exercise = Back.query.get(random_number)
-    return f'{random_exercise.exercise_name}'
+    return f'{random_exercise.exercise_name}' 
