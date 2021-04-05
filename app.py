@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -10,15 +10,12 @@ from models import Back
 
 import random
 
-@app.route('/one_exercise')
-def one_exercise():
+@app.route('/one_workout')
+def one_workout():
     no_of_rows = Back.query.count()
     random_sample = random.sample(range(1, no_of_rows + 1), 5)
     list_of_exercises = []
     for i in random_sample:
         random_exercise = Back.query.get(i)
-        list_of_exercises.append(random_exercise.exercise_name)
-    return f'{list_of_exercises}' 
-
-
-    
+        list_of_exercises.append(random_exercise.exercise_name)  
+    return render_template('one_workout.html', title='One Workout') + f'{list_of_exercises}' 
