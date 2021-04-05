@@ -1,0 +1,19 @@
+<!--PARENT TEMPLATE-->
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    {% if title %}
+        <title>Routine Fitness - {{ title }}</title> <!--If title is specified-->
+    {% else %}
+        <title>Routine Fitness</title> <!--If title is not specified-->
+    {% endif %}
+</head>
+
+<body>
+    {% block content %}
+    {% endblock %}
+</body>
+
+</html>
