@@ -10,6 +10,10 @@ from models import Back
 
 import random
 
+@app.route('/')
+def home():
+    return render_template('home.html', title='Home Page')
+
 @app.route('/one_workout')
 def one_workout():
     no_of_rows = Back.query.count()
@@ -17,5 +21,6 @@ def one_workout():
     list_of_exercises = []
     for i in random_sample:
         random_exercise = Back.query.get(i)
-        list_of_exercises.append(random_exercise.exercise_name)  
-    return render_template('one_workout.html', title='One Workout') + f'{list_of_exercises}' 
+        list_of_exercises.append(random_exercise.exercise_name)
+        one_workout = str(list_of_exercises)[1:-1]
+    return render_template('one_workout.html', title='One Workout') + f'{one_workout}' 
