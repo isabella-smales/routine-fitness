@@ -3,4 +3,22 @@
 
 {% block content %}
     <h1>Welcome to Routine Fitness</h1>
+    <form method="" action="">
+        <select name= times method="GET" action="{{ url_for('result') }}">
+            <option value="default" selected>Workout length</option>
+            {% for time in times %}
+            <option value= "{{time}}">{{time}}</option>"
+            {% endfor %}
+        </select>
+        
+        <select name= muscle_groups method="GET" action="{{ url_for('result') }}">
+            <option value="default" selected>Muscle Group</option>
+            {% for muscle_group in muscle_groups %}
+            <option value= "{{muscle_group}}">{{muscle_group}}</option>"
+            {% endfor %}
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    
 {% endblock content %}
+
