@@ -18,5 +18,5 @@ class Arms(db.Model):
     
 class Legs(db.Model):
     __tablename__ = 'legs'
-    id = db.Column(db.Integer, primary_key=True)
+    iid = db.Column(db.Integer, primary_key=True)
     exercise_name = db.Column(db.String)
