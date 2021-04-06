@@ -26,15 +26,21 @@ def home():
     
 @app.route("/<time>")
 def one_workout(time):
+    no_of_rows = Back.query.count()
     if time == 'Short (30 mins)':
-        no_of_rows = Back.query.count()
-        random_sample = random.sample(range(1, no_of_rows + 1), 5)
-        list_of_exercises = []
-        for i in random_sample:
-            random_exercise = Back.query.get(i)
-            list_of_exercises.append(random_exercise.exercise_name)
-            one_workout = str(list_of_exercises)[1:-1]
-        return render_template('one_workout.html', title='One Workout') + f'{one_workout}' + f"<h1>{time}</h1>"
+        random_sample = random.sample(range(1, no_of_rows + 1), 3)
+    elif time == 'Medium (1 hour)':
+        random_sample = random.sample(range(1, no_of_rows + 1), 6)
+    elif time == 'Long (1 hour 30 mins)':
+        random_sample = random.sample(range(1, no_of_rows + 1), 6) # 9 is out of sample size - will need to inlclude more, 6 for now
+    else:
+        return "ERROR" # Need to change this - put it as a placeholder for now
+    list_of_exercises = []
+    for i in random_sample:
+        random_exercise = Back.query.get(i)
+        list_of_exercises.append(random_exercise.exercise_name)
+        one_workout = str(list_of_exercises)[1:-1]
+    return render_template('one_workout.html', title='One Workout') + f'{one_workout}' + f"<h1>{time}</h1>"
 
    # print(form.time.choices[0][0]) #short 
   #  print(form.time.choices[1][0]) #medium
