@@ -33,8 +33,6 @@ def one_workout(time):
         random_sample = random.sample(range(1, no_of_rows + 1), 6)
     elif time == 'Long (1 hour 30 mins)':
         random_sample = random.sample(range(1, no_of_rows + 1), 6) # 9 is out of sample size - will need to inlclude more, 6 for now
-    else:
-        return "ERROR" # Need to change this - put it as a placeholder for now
     list_of_exercises = []
     for i in random_sample:
         random_exercise = Back.query.get(i)
