@@ -20,29 +20,43 @@ def home():
     time = form.time.data
 
     muscle_group = form.muscle_group.data
+    muscle1 = muscle_group[0]
+    if len(muscle_group) != 1:
+        muscle2 = muscle_group[1]
+    else:
+        muscle2 = muscle1
 
     if request.method == "POST":
-        return redirect(url_for("one_workout", time=time, muscle_group=muscle_group))
+        return redirect(url_for("one_workout", time=time, muscle1=muscle1, muscle2=muscle2))
     else: 
         return render_template("home.html")
     
-@app.route("/<time>/<muscle_group>")
-def one_workout(time, muscle_group):
+@app.route("/<time>/<muscle1>/<muscle2>")
+def one_workout(time, muscle1, muscle2):
     if time == 'Short (30 mins)':
-        no_of_exercises = 3
+        no_of_exercises = 4
     elif time == 'Medium (1 hour)':
         no_of_exercises = 6
     elif time == 'Long (1 hour 30 mins)':
-        no_of_exercises = 9 # 9 is out of sample size - will need to inlclude more, 6 for now
+        no_of_exercises = 8
     
     list_of_exercises = []
 
-    no_of_rows = eval(muscle_group).query.count()
-    random_sample = random.sample(range(1, no_of_rows + 1), min(no_of_exercises, no_of_rows))
-    for i in random_sample:
-        random_exercise = eval(muscle_group).query.get(i)
-        list_of_exercises.append(random_exercise.exercise_name)
-        one_workout = str(list_of_exercises)[1:-1]
-
+    if muscle2 == muscle1:
+        list = [muscle1]
+    else:
+        list = [muscle1, muscle2]
+    for muscle in list:
+        if len(list) == 1:
+            no_of_rows = eval(muscle).query.count()
+            random_sample = random.sample(range(1, no_of_rows + 1), min(no_of_exercises, no_of_rows))
+        else:
+            no_of_rows = eval(muscle).query.count()
+            random_sample = random.sample(range(1, no_of_rows + 1), min(int(no_of_exercises/2), no_of_rows))
+        for i in random_sample:
+            random_exercise = eval(muscle).query.get(i)
+            list_of_exercises.append(random_exercise.exercise_name)
+            one_workout = str(list_of_exercises)[1:-1]
+    
     return render_template('one_workout.html', title='One Workout') + f'{one_workout}' + f"<h1>{time}</h1>"
 
