@@ -8,7 +8,7 @@ class HomeForm(FlaskForm):
 
 class DailyForm(FlaskForm):
     time = SelectField('Workout Length', choices = [ 'Short (30 mins)', 'Medium (1 hour)', 'Long (1 hour 30 mins)'], validators=[DataRequired()])    
-    muscle_group = SelectMultipleField('Muscle Group', choices = [('Back', 'BK'), ('Chest', 'CH'), ('Arms', 'AR'), ('Biceps', 'BI'), ('Triceps','TR'), ('Shoulders','SH'), ('Legs', 'LG')], validators=[DataRequired()])
+    muscle_group = SelectMultipleField('Muscle Group', choices = [('Back', 'Back'), ('Chest', 'Chest'), ('Arms', 'Arms'), ('Biceps', 'Biceps'), ('Triceps','Triceps'), ('Shoulders','Shoulder'), ('Legs', 'Legs')], validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 class WeeklyForm(FlaskForm):
