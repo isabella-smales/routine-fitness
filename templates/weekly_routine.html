@@ -3,12 +3,12 @@
 
 {% block content %}
     <h1>Welcome to Routine Fitness</h1>
-    <form method="post" action="/">
+    <form method="post" action="/weeklyroutine">
         {{ form.hidden_tag() }}
         <p> 
-            {{ form.type_of_routine.label }}<br>
-            {{ form.type_of_routine(size = 8) }}
-        </p>        
+            {{ form.days.label }}<br>
+            {{ form.days(size = 8) }}
+        </p>
         <p>
             {{ form.submit() }}
         </p>
