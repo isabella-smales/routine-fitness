@@ -1,16 +1,53 @@
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-from forms import DailyForm, HomeForm, WeeklyForm
+from flask_migrate import Migrate
+from forms import DailyForm, HomeForm, WeeklyForm, LoginForm, RegistrationForm
+from flask_login import current_user, login_user, logout_user, LoginManager
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./data/exercises.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./data/empty.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False    # Disables modification notifications
 app.config['SECRET_KEY'] = 'string'
 db = SQLAlchemy(app)
-
-from models import Back, Chest, Arms, Legs
+migrate = Migrate(app, db)
+login = LoginManager(app)
+from models import Back, Chest, Arms, Legs, User
 
 import random
+
+@app.route('/login', methods =['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user)
+        return redirect(url_for('home'))
+    return render_template('login.html', title = 'Login', form=form)
+    
+@app.route('/register', methods = ['GET', 'POST'])
+def new_user():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'New User {form.username.data} registered')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
+
 
 @app.route('/', methods=['GET','POST'])
 def home():
@@ -115,7 +152,7 @@ def routine(days):
         muscle_group3 = ['Legs', 'Shoulders'] 
         sample_size = 3
 
-    for i in repeat:
+    for j in repeat:
         for muscle_group in [muscle_group1, muscle_group2, muscle_group3]: #[muscles]
             for muscle in muscle_group:   #muscles
                 if muscle == 'Biceps' or muscle == 'Triceps' or muscle == 'Shoulders':  # Calling rows for biceps
@@ -133,14 +170,3 @@ def routine(days):
                     routine = str(list_of_exercises)[1:-1].replace(",", "<br/>").replace("'", "")
 
     return render_template('routine.html', title='Your Routine') + f'{routine}' + f"<h1>{days}</h1>"
-
-
-    #day 1: Back, Biceps, Shoulders (x2 = size_of_sample)
-    #day 2: Chest, Triceps, Legs    (x2)
-    #if days == '3 days':
-    #day 1: Back, Biceps    (x3)
-    #day 2: Chest, Triceps  (x3)
-    #day 3: Legs, Shoulders (x3)
-    #if days = 4: double days = 2, if days = 6: double days = 3
-
-
