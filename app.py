@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, request, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from forms import DailyForm, HomeForm, WeeklyForm, LoginForm, RegistrationForm
-from flask_login import current_user, login_user, logout_user, LoginManager
+from flask_login import current_user, login_user, logout_user, LoginManager, login_required
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./data/exercise.sqlite'
@@ -11,6 +11,7 @@ app.config['SECRET_KEY'] = 'string'
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 login = LoginManager(app)
+login.login_view = 'login'
 from models import Back, Chest, Arms, Legs, User
 
 import random
@@ -26,6 +27,9 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user)
+        next_page = request.args.get('next')
+        if next_page:
+            return redirect(next_page)
         return redirect(url_for('home'))
     return render_template('login.html', title = 'Login', form=form)
     
@@ -63,6 +67,7 @@ def home():
         return render_template("home.html")
 
 @app.route('/dailyroutine', methods=['GET','POST'])
+@login_required
 def daily_routine():    
     form = DailyForm()
     if not form.validate_on_submit():
@@ -81,6 +86,7 @@ def daily_routine():
         return render_template("daily_routine.html")
     
 @app.route("/<time>/<muscle1>/<muscle2>")
+@login_required
 def one_workout(time, muscle1, muscle2):
     if time == 'Short (30 mins)':   
         no_of_exercises = 4
@@ -119,6 +125,7 @@ def one_workout(time, muscle1, muscle2):
     return render_template('one_workout.html', title='One Workout') + f'{one_workout}' + f"<h1>{time}</h1>"
 
 @app.route('/weeklyroutine', methods=['GET', 'POST'])
+@login_required
 def weekly_routine():
     form = WeeklyForm()
     if not form.validate_on_submit():
@@ -131,6 +138,7 @@ def weekly_routine():
         return render_template("weekly_routine.html")
 
 @app.route("/<days>")
+@login_required
 def routine(days):
     no_of_muscle_groups = 6 // int(days[0])
     no_of_exercises = int(days[0])
