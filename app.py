@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy
-from forms import InputForm, HomeForm, WeeklyForm
+from forms import DailyForm, HomeForm, WeeklyForm
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./data/exercises.sqlite'
@@ -27,7 +27,7 @@ def home():
 
 @app.route('/dailyroutine', methods=['GET','POST'])
 def daily_routine():    
-    form = InputForm()
+    form = DailyForm()
     if not form.validate_on_submit():
         return render_template('daily_routine.html', form=form)
     time = form.time.data
@@ -99,29 +99,38 @@ def routine(days):
     no_of_muscle_groups = 6 // int(days[0])
     no_of_exercises = int(days[0])
     list_of_exercises = []
-    if days == '2 days':
+    if days == '2 days' or days == '3 days':
+        repeat = [1]
+    elif days == '4 days' or '6 days':
+        repeat = [1, 2]
+
+    if days == '2 days' or days == '4 days':
         muscle_group1 = ['Back', 'Biceps', 'Shoulders']
         muscle_group2 = ['Chest', 'Triceps', 'Legs']
         muscle_group3 = []
-    elif days == '3 days':
+        sample_size = 2
+    elif days == '3 days' or days == '6 days':
         muscle_group1 = ['Back', 'Biceps']
         muscle_group2 = ['Chest', 'Triceps']
         muscle_group3 = ['Legs', 'Shoulders'] 
-    for muscle_group in [muscle_group1, muscle_group2, muscle_group3]: #[muscles]
-        for muscle in muscle_group:   #muscles
-            if muscle == 'Biceps' or muscle == 'Triceps' or muscle == 'Shoulders':  # Calling rows for biceps
-                arm_subgroup = Arms.query.filter(Arms.arm_subgroup == muscle).all()
-                no_of_rows = len(arm_subgroup)
-            else:   # else rows for all else
-                no_of_rows = eval(muscle).query.count()
-            random_sample = random.sample(range(1, no_of_rows + 1), int(days[0]))
-            for i in random_sample: #
-                if muscle == 'Biceps' or muscle == 'Triceps' or muscle == 'Shoulders':
-                    random_exercise = arm_subgroup[i-1]
-                else:
-                    random_exercise = eval(muscle).query.get(i)    #random_exercise = biceps[i-1].exercise_name
-                list_of_exercises.append(random_exercise.exercise_name)
-                routine = str(list_of_exercises)[1:-1].replace(",", "<br/>").replace("'", "")
+        sample_size = 3
+
+    for i in repeat:
+        for muscle_group in [muscle_group1, muscle_group2, muscle_group3]: #[muscles]
+            for muscle in muscle_group:   #muscles
+                if muscle == 'Biceps' or muscle == 'Triceps' or muscle == 'Shoulders':  # Calling rows for biceps
+                    arm_subgroup = Arms.query.filter(Arms.arm_subgroup == muscle).all()
+                    no_of_rows = len(arm_subgroup)
+                else:   # else rows for all else
+                    no_of_rows = eval(muscle).query.count()
+                random_sample = random.sample(range(1, no_of_rows + 1), sample_size)
+                for i in random_sample: #
+                    if muscle == 'Biceps' or muscle == 'Triceps' or muscle == 'Shoulders':
+                        random_exercise = arm_subgroup[i-1]
+                    else:
+                        random_exercise = eval(muscle).query.get(i)    #random_exercise = biceps[i-1].exercise_name
+                    list_of_exercises.append(random_exercise.exercise_name)
+                    routine = str(list_of_exercises)[1:-1].replace(",", "<br/>").replace("'", "")
 
     return render_template('routine.html', title='Your Routine') + f'{routine}' + f"<h1>{days}</h1>"
 
