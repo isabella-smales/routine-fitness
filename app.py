@@ -16,43 +16,8 @@ from models import Back, Chest, Arms, Legs, User
 
 import random
 
-@app.route('/login', methods =['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Invalid username or password')
-            return redirect(url_for('login'))
-        login_user(user)
-        next_page = request.args.get('next')
-        if next_page:
-            return redirect(next_page)
-        return redirect(url_for('home'))
-    return render_template('login.html', title = 'Login', form=form)
-    
-@app.route('/register', methods = ['GET', 'POST'])
-def new_user():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(username=form.username.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash(f'New User {form.username.data} registered')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('home'))
-
-
+#Main Page - choose between a daily routine and a weekly routine. On submission 
+#the form just redirects to these pages so you could remove the form and just have links
 @app.route('/', methods=['GET','POST'])
 def home():
     form = HomeForm()
@@ -66,6 +31,7 @@ def home():
     else:
         return render_template("home.html")
 
+#Daily Routine - choose length of time to work out and up to 2 muscle groups
 @app.route('/dailyroutine', methods=['GET','POST'])
 @login_required
 def daily_routine():    
@@ -84,7 +50,9 @@ def daily_routine():
         return redirect(url_for("one_workout", time=time, muscle1=muscle1, muscle2=muscle2))
     else: 
         return render_template("daily_routine.html")
-    
+
+#Where Daily Routine redirects. The route is the /time/muscle group 1/ muscle group 2. If muscle group 1
+#is muscle group 2 then it's just eg /Arms/Arms  
 @app.route("/<time>/<muscle1>/<muscle2>")
 @login_required
 def one_workout(time, muscle1, muscle2):
@@ -124,6 +92,7 @@ def one_workout(time, muscle1, muscle2):
 
     return render_template('one_workout.html', title='One Workout') + f'{one_workout}' + f"<h1>{time}</h1>"
 
+#Weekly Routine - choose number of days to exercise
 @app.route('/weeklyroutine', methods=['GET', 'POST'])
 @login_required
 def weekly_routine():
@@ -131,17 +100,17 @@ def weekly_routine():
     if not form.validate_on_submit():
         return render_template('weekly_routine.html', form=form)
     days = form.days.data
-    print(days)
     if request.method == "POST":
         return redirect(url_for("routine", days=days))
     else: 
         return render_template("weekly_routine.html")
 
+#All the exercises are presented as a long list. Each group of six exercises represents one day of the
+#weekly routine. All muscle groups are covered (except Arms which is made up of the subgroups Biceps,
+#Triceps, and Shoudlers) so this is a full body routine.
 @app.route("/<days>")
 @login_required
 def routine(days):
-    no_of_muscle_groups = 6 // int(days[0])
-    no_of_exercises = int(days[0])
     list_of_exercises = []
     if days == '2 days' or days == '3 days':
         repeat = [1]
@@ -177,3 +146,42 @@ def routine(days):
                     routine = str(list_of_exercises)[1:-1].replace(",", "<br/>").replace("'", "")
 
     return render_template('routine.html', title='Your Routine') + f'{routine}' + f"<h1>{days}</h1>"
+
+#Login page - username and password
+@app.route('/login', methods =['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user)
+        next_page = request.args.get('next')
+        if next_page:
+            return redirect(next_page)
+        return redirect(url_for('home'))
+    return render_template('login.html', title = 'Login', form=form)
+
+#Register - email, username, password    
+@app.route('/register', methods = ['GET', 'POST'])
+def new_user():
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'New User {form.username.data} registered')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+#Logout Page
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
